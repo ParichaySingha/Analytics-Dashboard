@@ -7,6 +7,7 @@ import {
   Users,
   Zap
 } from 'lucide-react';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
@@ -48,6 +49,7 @@ const systemItems = [
 
 export const Sidebar = () => {
   const { state } = useSidebar();
+  const { preferences } = usePreferences();
   const collapsed = state === 'collapsed';
 
   const renderMenuItems = (items: typeof analyticsItems) => (
@@ -89,7 +91,7 @@ export const Sidebar = () => {
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg font-semibold text-foreground truncate">AI Analytics</h1>
+              <h1 className="text-lg font-semibold text-foreground truncate">{preferences.dashboardName}</h1>
               <p className="text-xs text-muted-foreground truncate">Dashboard</p>
             </div>
           )}

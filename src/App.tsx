@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ColorProvider } from "@/contexts/ColorContext";
 import { ProfileProvider } from "@/contexts/ProfileContext";
+import { PreferencesProvider } from "@/contexts/PreferencesContext";
 import Index from "./pages/Index";
 import Overview from "./pages/Overview";
 import RealTimeAnalytics from "./pages/RealTimeAnalytics";
@@ -26,7 +27,8 @@ const App = () => (
     <ThemeProvider>
       <ColorProvider>
         <ProfileProvider>
-          <TooltipProvider>
+          <PreferencesProvider>
+            <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -45,7 +47,8 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-          </TooltipProvider>
+            </TooltipProvider>
+          </PreferencesProvider>
         </ProfileProvider>
       </ColorProvider>
     </ThemeProvider>

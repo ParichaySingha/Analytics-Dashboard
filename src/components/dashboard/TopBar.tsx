@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useTheme } from '@/contexts/ThemeContext';
+import { usePreferences } from '@/contexts/PreferencesContext';
 import { ProfileDropdown } from './ProfileDropdown';
 import {
   DropdownMenu,
@@ -13,6 +14,7 @@ import {
 
 export const TopBar = () => {
   const { theme, setTheme, actualTheme } = useTheme();
+  const { preferences } = usePreferences();
 
   const getThemeIcon = () => {
     if (theme === 'light') return <Sun className="h-4 w-4" />;
@@ -30,7 +32,7 @@ export const TopBar = () => {
           </div>
           
           <div className="flex items-center gap-4">
-            <h2 className="text-lg md:text-xl font-semibold text-foreground">Dashboard Overview</h2>
+            <h2 className="text-lg md:text-xl font-semibold text-foreground">{preferences.dashboardName} Overview</h2>
             <div className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground">
               <span>Last updated:</span>
               <span className="text-foreground font-medium">2 minutes ago</span>

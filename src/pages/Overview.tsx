@@ -3,15 +3,18 @@ import { RealTimeMetrics } from '@/components/dashboard/RealTimeMetrics';
 import { AnalyticsChart } from '@/components/dashboard/AnalyticsChart';
 import { AIInsightsPanel } from '@/components/dashboard/AIInsightsPanel';
 import { RealTimeClock } from '@/components/dashboard/RealTimeClock';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
 const OverviewPage = () => {
+  const { preferences } = usePreferences();
+  
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="animate-fade-in">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Dashboard Overview</h1>
+              <h1 className="text-2xl font-bold text-foreground">{preferences.dashboardName} Overview</h1>
               <p className="text-muted-foreground">Complete analytics overview with real-time insights</p>
             </div>
             <div className="hidden lg:block">

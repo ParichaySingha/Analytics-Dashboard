@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useColor, predefinedPalettes } from '@/contexts/ColorContext';
 import { useProfile } from '@/contexts/ProfileContext';
+import { usePreferences, TIMEZONE_OPTIONS } from '@/contexts/PreferencesContext';
 import { Settings, User, Shield, Bell, Database, Palette, Save, Download, Trash2, Sun, Moon, Monitor, Palette as PaletteIcon, Upload, Camera } from 'lucide-react';
 import { RealTimeClock } from '@/components/dashboard/RealTimeClock';
 
@@ -21,19 +22,16 @@ const SettingsPage = () => {
   const { theme, setTheme, actualTheme } = useTheme();
   const { selectedPalette, setSelectedPalette, customColors, setCustomColors, isCustom, setIsCustom } = useColor();
   const { profile, updateProfile, saveProfile, isLoading: profileLoading } = useProfile();
+  const { preferences, updatePreferences, savePreferences, isLoading: preferencesLoading } = usePreferences();
   const [isLoading, setIsLoading] = useState(false);
   
-  // Form state
+  // Form state for profile and other settings
   const [formData, setFormData] = useState({
-    dashboardName: 'AI Analytics Dashboard',
-    timezone: 'utc',
     firstName: '',
     lastName: '',
     email: '',
     bio: '',
     avatar: '',
-    autoRefresh: true,
-    soundAlerts: false,
     twoFactor: false,
     sessionTimeout: true,
     emailAlerts: true,
@@ -41,11 +39,6 @@ const SettingsPage = () => {
     emailUpdates: false,
     pushAnomalies: true,
     pushGoals: true,
-    dataRetention: '90d',
-    backupFrequency: 'weekly',
-    chartStyle: 'modern',
-    animations: true,
-    reducedMotion: false,
   });
 
   // Load profile data into form when profile changes
@@ -88,6 +81,13 @@ const SettingsPage = () => {
         toast({
           title: "Profile updated",
           description: "Your profile information has been updated successfully.",
+        });
+      } else if (section === 'General') {
+        // For general preferences, save to PreferencesContext
+        await savePreferences();
+        toast({
+          title: "General preferences saved",
+          description: "Your general preferences have been updated successfully.",
         });
       } else if (section === 'Appearance') {
         // For appearance settings, the theme is already saved via the context
@@ -229,25 +229,76 @@ const SettingsPage = () => {
                     <Label htmlFor="dashboard-name">Dashboard Name</Label>
                     <Input 
                       id="dashboard-name" 
-                      value={formData.dashboardName}
-                      onChange={(e) => handleInputChange('dashboardName', e.target.value)}
+                      value={preferences.dashboardName}
+                      onChange={(e) => updatePreferences({ dashboardName: e.target.value })}
                       placeholder="AI Analytics Dashboard" 
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="timezone">Timezone</Label>
-                    <Select value={formData.timezone} onValueChange={(value) => handleInputChange('timezone', value)}>
+                    <Select value={preferences.timezone} onValueChange={(value) => updatePreferences({ timezone: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select timezone" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="utc">UTC</SelectItem>
-                        <SelectItem value="est">Eastern Time</SelectItem>
-                        <SelectItem value="pst">Pacific Time</SelectItem>
-                        <SelectItem value="cet">Central European Time</SelectItem>
+                      <SelectContent className="max-h-[300px]">
+                        {TIMEZONE_OPTIONS.map((timezone) => (
+                          <SelectItem key={timezone.value} value={timezone.value}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{timezone.label}</span>
+                              <span className="text-xs text-muted-foreground">{timezone.offset}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="data-retention">Data Retention</Label>
+                    <Select value={preferences.dataRetention} onValueChange={(value) => updatePreferences({ dataRetention: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select retention period" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30d">30 days</SelectItem>
+                        <SelectItem value="90d">90 days</SelectItem>
+                        <SelectItem value="180d">6 months</SelectItem>
+                        <SelectItem value="365d">1 year</SelectItem>
+                        <SelectItem value="forever">Forever</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="backup-frequency">Backup Frequency</Label>
+                    <Select value={preferences.backupFrequency} onValueChange={(value) => updatePreferences({ backupFrequency: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select backup frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="manual">Manual only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="chart-style">Chart Style</Label>
+                  <Select value={preferences.chartStyle} onValueChange={(value) => updatePreferences({ chartStyle: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select chart style" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="modern">Modern</SelectItem>
+                      <SelectItem value="classic">Classic</SelectItem>
+                      <SelectItem value="minimal">Minimal</SelectItem>
+                      <SelectItem value="colorful">Colorful</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="space-y-4">
@@ -258,8 +309,8 @@ const SettingsPage = () => {
                     </div>
                     <Switch 
                       id="auto-refresh" 
-                      checked={formData.autoRefresh}
-                      onCheckedChange={(checked) => handleSwitchChange('autoRefresh', checked)}
+                      checked={preferences.autoRefresh}
+                      onCheckedChange={(checked) => updatePreferences({ autoRefresh: checked })}
                     />
                   </div>
                   
@@ -270,16 +321,66 @@ const SettingsPage = () => {
                     </div>
                     <Switch 
                       id="sound-alerts" 
-                      checked={formData.soundAlerts}
-                      onCheckedChange={(checked) => handleSwitchChange('soundAlerts', checked)}
+                      checked={preferences.soundAlerts}
+                      onCheckedChange={(checked) => updatePreferences({ soundAlerts: checked })}
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex-1">
+                      <Label htmlFor="animations">Enable Animations</Label>
+                      <p className="text-sm text-muted-foreground">Use smooth transitions and effects</p>
+                    </div>
+                    <Switch 
+                      id="animations" 
+                      checked={preferences.animations}
+                      onCheckedChange={(checked) => updatePreferences({ animations: checked })}
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex-1">
+                      <Label htmlFor="reduced-motion">Reduce Motion</Label>
+                      <p className="text-sm text-muted-foreground">Minimize animations for accessibility</p>
+                    </div>
+                    <Switch 
+                      id="reduced-motion" 
+                      checked={preferences.reducedMotion}
+                      onCheckedChange={(checked) => updatePreferences({ reducedMotion: checked })}
                     />
                   </div>
                 </div>
                 
-                <div className="flex justify-end pt-4 border-t">
-                  <Button onClick={() => handleSave('General')} disabled={isLoading} className="min-w-[120px]">
+                <div className="flex justify-between pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      if (confirm('Are you sure you want to reset all preferences to default values?')) {
+                        updatePreferences({
+                          dashboardName: 'AI Analytics Dashboard',
+                          timezone: 'UTC',
+                          autoRefresh: true,
+                          soundAlerts: false,
+                          dataRetention: '90d',
+                          backupFrequency: 'weekly',
+                          chartStyle: 'modern',
+                          animations: true,
+                          reducedMotion: false,
+                        });
+                        toast({
+                          title: "Preferences reset",
+                          description: "All preferences have been reset to default values.",
+                        });
+                      }
+                    }}
+                    disabled={isLoading || preferencesLoading}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Reset to Defaults
+                  </Button>
+                  <Button onClick={() => handleSave('General')} disabled={isLoading || preferencesLoading} className="min-w-[120px]">
                     <Save className="mr-2 h-4 w-4" />
-                    {isLoading ? 'Saving...' : 'Save Changes'}
+                    {isLoading || preferencesLoading ? 'Saving...' : 'Save Changes'}
                   </Button>
                 </div>
               </CardContent>

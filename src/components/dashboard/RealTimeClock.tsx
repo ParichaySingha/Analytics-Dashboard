@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
+import { usePreferences } from '@/contexts/PreferencesContext';
 
 export const RealTimeClock = () => {
+  const { preferences } = usePreferences();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -13,21 +15,43 @@ export const RealTimeClock = () => {
   }, []);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour12: true,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
+    try {
+      return date.toLocaleTimeString('en-US', {
+        timeZone: preferences.timezone,
+        hour12: true,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+    } catch (error) {
+      // Fallback to local time if timezone is invalid
+      return date.toLocaleTimeString('en-US', {
+        hour12: true,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+    }
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    try {
+      return date.toLocaleDateString('en-US', {
+        timeZone: preferences.timezone,
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch (error) {
+      // Fallback to local time if timezone is invalid
+      return date.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    }
   };
 
   return (
