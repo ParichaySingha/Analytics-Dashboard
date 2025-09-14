@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { 
   BarChart3, 
   Brain, 
@@ -6,8 +5,7 @@ import {
   Settings, 
   TrendingUp, 
   Users,
-  Zap,
-  ChevronDown
+  Zap
 } from 'lucide-react';
 import {
   Sidebar as ShadcnSidebar,
@@ -24,7 +22,6 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { NavLink } from 'react-router-dom';
 
 const analyticsItems = [
@@ -52,9 +49,6 @@ const systemItems = [
 export const Sidebar = () => {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
-  const [analyticsOpen, setAnalyticsOpen] = useState(true);
-  const [aiOpen, setAiOpen] = useState(true);
-  const [dataOpen, setDataOpen] = useState(false);
 
   const renderMenuItems = (items: typeof analyticsItems) => (
     <SidebarMenu>
@@ -62,21 +56,21 @@ export const Sidebar = () => {
         const IconComp = (item as any).icon ?? BarChart3;
         return (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild className={cn("transition-all duration-200 group")}>
+            <SidebarMenuButton asChild className={cn("transition-all duration-200 group w-full")}>
               <NavLink
                 to={item.href}
                 end
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3",
+                    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-lg border border-primary/20"
-                      : "hover:bg-muted hover:text-foreground text-muted-foreground"
+                      : "text-foreground hover:bg-muted"
                   )
                 }
               >
-                <IconComp className="h-4 w-4 shrink-0" />
-                {!collapsed && <span className="truncate">{item.name}</span>}
+                <IconComp className="h-4 w-4 shrink-0 text-foreground" />
+                {!collapsed && <span className="truncate text-foreground">{item.name}</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -109,90 +103,39 @@ export const Sidebar = () => {
       <SidebarContent className="p-2">
         {/* Analytics Section */}
         <SidebarGroup>
-          <Collapsible open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className={cn(
-                "group/label cursor-pointer hover:bg-muted rounded-md p-2 transition-colors",
-                collapsed && "justify-center"
-              )}>
-                <BarChart3 className="h-4 w-4 shrink-0" />
-                {!collapsed && (
-                  <>
-                    <span className="ml-2 flex-1 text-left">Analytics</span>
-                    <ChevronDown className={cn(
-                      "h-4 w-4 shrink-0 transition-transform duration-200",
-                      analyticsOpen && "rotate-180"
-                    )} />
-                  </>
-                )}
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                {renderMenuItems(analyticsItems)}
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
+          <SidebarGroupLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Analytics
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            {renderMenuItems(analyticsItems)}
+          </SidebarGroupContent>
         </SidebarGroup>
 
         {/* AI Section */}
         <SidebarGroup>
-          <Collapsible open={aiOpen} onOpenChange={setAiOpen}>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className={cn(
-                "group/label cursor-pointer hover:bg-muted rounded-md p-2 transition-colors",
-                collapsed && "justify-center"
-              )}>
-                <Brain className="h-4 w-4 shrink-0" />
-                {!collapsed && (
-                  <>
-                    <span className="ml-2 flex-1 text-left">AI & ML</span>
-                    <ChevronDown className={cn(
-                      "h-4 w-4 shrink-0 transition-transform duration-200",
-                      aiOpen && "rotate-180"
-                    )} />
-                  </>
-                )}
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                {renderMenuItems(aiItems)}
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
+          <SidebarGroupLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            AI & ML
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            {renderMenuItems(aiItems)}
+          </SidebarGroupContent>
         </SidebarGroup>
 
         {/* Data Section */}
         <SidebarGroup>
-          <Collapsible open={dataOpen} onOpenChange={setDataOpen}>
-            <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className={cn(
-                "group/label cursor-pointer hover:bg-muted rounded-md p-2 transition-colors",
-                collapsed && "justify-center"
-              )}>
-                <Database className="h-4 w-4 shrink-0" />
-                {!collapsed && (
-                  <>
-                    <span className="ml-2 flex-1 text-left">Data</span>
-                    <ChevronDown className={cn(
-                      "h-4 w-4 shrink-0 transition-transform duration-200",
-                      dataOpen && "rotate-180"
-                    )} />
-                  </>
-                )}
-              </SidebarGroupLabel>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                {renderMenuItems(dataItems)}
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
+          <SidebarGroupLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Data
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            {renderMenuItems(dataItems)}
+          </SidebarGroupContent>
         </SidebarGroup>
 
         {/* System Section */}
         <SidebarGroup>
+          <SidebarGroupLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            System
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             {renderMenuItems(systemItems)}
           </SidebarGroupContent>
