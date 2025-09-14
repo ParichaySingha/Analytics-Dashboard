@@ -105,12 +105,12 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* Electric blue primary for data visualization */
+    /* Dynamic primary color for data visualization */
     --primary: 214 100% 60%;
     --primary-foreground: 0 0% 100%;
     --primary-glow: 214 100% 70%;
 
-    /* Purple secondary for AI insights */
+    /* Dynamic secondary color for AI insights */
     --secondary: 270 95% 75%;
     --secondary-foreground: 0 0% 100%;
 
@@ -118,7 +118,7 @@ All colors MUST be HSL.
     --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    /* Teal accent for highlights */
+    /* Dynamic accent color for highlights */
     --accent: 180 100% 65%;
     --accent-foreground: 0 0% 100%;
 
@@ -139,7 +139,7 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 214 100% 60%;
 
-    /* Chart colors for data visualization */
+    /* Dynamic chart colors for data visualization */
     --chart-1: 214 100% 60%;
     --chart-2: 270 95% 75%;
     --chart-3: 180 100% 65%;

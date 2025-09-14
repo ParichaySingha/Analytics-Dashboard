@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ColorProvider } from "@/contexts/ColorContext";
 import Index from "./pages/Index";
 import Overview from "./pages/Overview";
 import RealTimeAnalytics from "./pages/RealTimeAnalytics";
@@ -22,26 +23,28 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/overview" element={<Overview />} />
-            <Route path="/analytics/realtime" element={<RealTimeAnalytics />} />
-            <Route path="/analytics/reports" element={<CustomReports />} />
-            <Route path="/ai/insights" element={<AIInsights />} />
-            <Route path="/ai/models" element={<MLModels />} />
-            <Route path="/ai/predictions" element={<Predictions />} />
-            <Route path="/data/sources" element={<DataSources />} />
-            <Route path="/data/users" element={<Users />} />
-            <Route path="/data/logs" element={<APILogs />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <ColorProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/overview" element={<Overview />} />
+              <Route path="/analytics/realtime" element={<RealTimeAnalytics />} />
+              <Route path="/analytics/reports" element={<CustomReports />} />
+              <Route path="/ai/insights" element={<AIInsights />} />
+              <Route path="/ai/models" element={<MLModels />} />
+              <Route path="/ai/predictions" element={<Predictions />} />
+              <Route path="/data/sources" element={<DataSources />} />
+              <Route path="/data/users" element={<Users />} />
+              <Route path="/data/logs" element={<APILogs />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ColorProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );

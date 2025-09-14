@@ -10,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Settings, User, Shield, Bell, Database, Palette, Save, Download, Trash2, Sun, Moon, Monitor } from 'lucide-react';
+import { useColor, predefinedPalettes } from '@/contexts/ColorContext';
+import { Settings, User, Shield, Bell, Database, Palette, Save, Download, Trash2, Sun, Moon, Monitor, Palette as PaletteIcon } from 'lucide-react';
 import { RealTimeClock } from '@/components/dashboard/RealTimeClock';
 
 const SettingsPage = () => {
   const { toast } = useToast();
   const { theme, setTheme, actualTheme } = useTheme();
+  const { selectedPalette, setSelectedPalette, customColors, setCustomColors, isCustom, setIsCustom } = useColor();
   const [isLoading, setIsLoading] = useState(false);
   
   // Form state
@@ -582,6 +584,152 @@ const SettingsPage = () => {
                   </div>
                 </div>
                 
+                {/* Global Color Settings */}
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <PaletteIcon className="h-5 w-5 text-primary" />
+                      <h4 className="font-medium text-foreground">Global Color Scheme</h4>
+                    </div>
+                    
+                    {/* Color Mode Toggle */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div className="flex-1">
+                        <Label htmlFor="custom-colors">Custom Colors</Label>
+                        <p className="text-sm text-muted-foreground">Use custom colors instead of predefined palettes</p>
+                      </div>
+                      <Switch 
+                        id="custom-colors" 
+                        checked={isCustom}
+                        onCheckedChange={setIsCustom}
+                      />
+                    </div>
+
+                    {!isCustom ? (
+                      /* Predefined Color Palettes */
+                      <div className="space-y-3">
+                        <Label>Choose a Color Palette</Label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {predefinedPalettes.map((palette) => (
+                            <div
+                              key={palette.id}
+                              className={`relative p-3 rounded-lg border-2 cursor-pointer transition-all hover:scale-105 ${
+                                selectedPalette.id === palette.id
+                                  ? 'border-primary ring-2 ring-primary/20'
+                                  : 'border-border hover:border-primary/50'
+                              }`}
+                              onClick={() => setSelectedPalette(palette)}
+                            >
+                              <div className="space-y-2">
+                                <div className="flex gap-1">
+                                  <div 
+                                    className="w-6 h-6 rounded-full border border-border"
+                                    style={{ backgroundColor: palette.primary }}
+                                  />
+                                  <div 
+                                    className="w-6 h-6 rounded-full border border-border"
+                                    style={{ backgroundColor: palette.secondary }}
+                                  />
+                                  <div 
+                                    className="w-6 h-6 rounded-full border border-border"
+                                    style={{ backgroundColor: palette.accent }}
+                                  />
+                                </div>
+                                <p className="text-xs font-medium text-foreground">{palette.name}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      /* Custom Color Pickers */
+                      <div className="space-y-4">
+                        <Label>Custom Color Scheme</Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="custom-primary">Primary Color</Label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                id="custom-primary"
+                                type="color"
+                                value={customColors.primary}
+                                onChange={(e) => setCustomColors({ ...customColors, primary: e.target.value })}
+                                className="w-12 h-10 rounded border border-border cursor-pointer"
+                              />
+                              <Input
+                                value={customColors.primary}
+                                onChange={(e) => setCustomColors({ ...customColors, primary: e.target.value })}
+                                className="flex-1"
+                                placeholder="#3b82f6"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="custom-secondary">Secondary Color</Label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                id="custom-secondary"
+                                type="color"
+                                value={customColors.secondary}
+                                onChange={(e) => setCustomColors({ ...customColors, secondary: e.target.value })}
+                                className="w-12 h-10 rounded border border-border cursor-pointer"
+                              />
+                              <Input
+                                value={customColors.secondary}
+                                onChange={(e) => setCustomColors({ ...customColors, secondary: e.target.value })}
+                                className="flex-1"
+                                placeholder="#8b5cf6"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="custom-accent">Accent Color</Label>
+                            <div className="flex items-center gap-2">
+                              <input
+                                id="custom-accent"
+                                type="color"
+                                value={customColors.accent}
+                                onChange={(e) => setCustomColors({ ...customColors, accent: e.target.value })}
+                                className="w-12 h-10 rounded border border-border cursor-pointer"
+                              />
+                              <Input
+                                value={customColors.accent}
+                                onChange={(e) => setCustomColors({ ...customColors, accent: e.target.value })}
+                                className="flex-1"
+                                placeholder="#06b6d4"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Color Preview */}
+                        <div className="p-4 rounded-lg border border-border bg-muted/50">
+                          <Label className="text-sm font-medium">Color Preview</Label>
+                          <div className="flex gap-2 mt-2">
+                            <div 
+                              className="w-8 h-8 rounded border border-border"
+                              style={{ backgroundColor: customColors.primary }}
+                              title="Primary"
+                            />
+                            <div 
+                              className="w-8 h-8 rounded border border-border"
+                              style={{ backgroundColor: customColors.secondary }}
+                              title="Secondary"
+                            />
+                            <div 
+                              className="w-8 h-8 rounded border border-border"
+                              style={{ backgroundColor: customColors.accent }}
+                              title="Accent"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div className="flex-1">
