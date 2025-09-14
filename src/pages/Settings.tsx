@@ -9,11 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, User, Shield, Bell, Database, Palette, Save, Download, Trash2 } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Settings, User, Shield, Bell, Database, Palette, Save, Download, Trash2, Sun, Moon, Monitor } from 'lucide-react';
 import { RealTimeClock } from '@/components/dashboard/RealTimeClock';
 
 const SettingsPage = () => {
   const { toast } = useToast();
+  const { theme, setTheme, actualTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   
   // Form state
@@ -35,7 +37,6 @@ const SettingsPage = () => {
     pushGoals: true,
     dataRetention: '90d',
     backupFrequency: 'weekly',
-    theme: 'auto',
     chartStyle: 'modern',
     animations: true,
     reducedMotion: false,
@@ -54,10 +55,19 @@ const SettingsPage = () => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      toast({
-        title: "Settings saved",
-        description: `${section} settings have been updated successfully.`,
-      });
+      
+      // For appearance settings, the theme is already saved via the context
+      if (section === 'Appearance') {
+        toast({
+          title: "Appearance settings saved",
+          description: `Theme and appearance preferences have been updated successfully.`,
+        });
+      } else {
+        toast({
+          title: "Settings saved",
+          description: `${section} settings have been updated successfully.`,
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -526,16 +536,35 @@ const SettingsPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="theme">Theme</Label>
-                    <Select value={formData.theme} onValueChange={(value) => handleInputChange('theme', value)}>
+                    <Select value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'auto')}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select theme" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="auto">Auto</SelectItem>
+                        <SelectItem value="light">
+                          <div className="flex items-center gap-2">
+                            <Sun className="h-4 w-4" />
+                            Light
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="dark">
+                          <div className="flex items-center gap-2">
+                            <Moon className="h-4 w-4" />
+                            Dark
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="auto">
+                          <div className="flex items-center gap-2">
+                            <Monitor className="h-4 w-4" />
+                            Auto
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
+                    <p className="text-sm text-muted-foreground">
+                      Current theme: {actualTheme === 'dark' ? 'Dark' : 'Light'}
+                      {theme === 'auto' && ' (System)'}
+                    </p>
                   </div>
                   
                   <div className="space-y-2">

@@ -1,9 +1,24 @@
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search, User, Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useTheme } from '@/contexts/ThemeContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export const TopBar = () => {
+  const { theme, setTheme, actualTheme } = useTheme();
+
+  const getThemeIcon = () => {
+    if (theme === 'light') return <Sun className="h-4 w-4" />;
+    if (theme === 'dark') return <Moon className="h-4 w-4" />;
+    return <Monitor className="h-4 w-4" />;
+  };
+
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm">
       <div className="flex h-full items-center justify-between px-4 md:px-6">
@@ -34,6 +49,30 @@ export const TopBar = () => {
           <Button variant="ghost" size="icon" className="sm:hidden">
             <Search className="h-4 w-4" />
           </Button>
+          
+          {/* Theme Toggle */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" title="Toggle theme">
+                {getThemeIcon()}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme('light')}>
+                <Sun className="mr-2 h-4 w-4" />
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('dark')}>
+                <Moon className="mr-2 h-4 w-4" />
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme('auto')}>
+                <Monitor className="mr-2 h-4 w-4" />
+                Auto
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           <Button variant="ghost" size="icon">
             <Bell className="h-4 w-4" />
           </Button>

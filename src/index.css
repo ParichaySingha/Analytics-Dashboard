@@ -91,6 +91,84 @@ All colors MUST be HSL.
     --sidebar-ring: 214 100% 60%;
   }
 
+  .light {
+    /* Light theme base colors */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    /* Card system for light theme */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --card-border: 214.3 31.8% 91.4%;
+
+    /* Popover colors */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Electric blue primary for data visualization */
+    --primary: 214 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 214 100% 70%;
+
+    /* Purple secondary for AI insights */
+    --secondary: 270 95% 75%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted colors for subtle elements */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    /* Teal accent for highlights */
+    --accent: 180 100% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive colors */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Success colors for positive metrics */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning colors */
+    --warning: 45 93% 58%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Border and input colors */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 214 100% 60%;
+
+    /* Chart colors for data visualization */
+    --chart-1: 214 100% 60%;
+    --chart-2: 270 95% 75%;
+    --chart-3: 180 100% 65%;
+    --chart-4: 142 71% 45%;
+    --chart-5: 45 93% 58%;
+    --chart-6: 310 100% 70%;
+
+    /* Gradients for light theme */
+    --gradient-primary: linear-gradient(135deg, hsl(214 100% 60%), hsl(214 100% 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(270 95% 75%), hsl(280 95% 80%));
+    --gradient-dashboard: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100% / 0.9), hsl(210 40% 98% / 0.9));
+
+    /* Shadows and effects for light theme */
+    --shadow-glow: 0 0 50px hsl(214 100% 60% / 0.2);
+    --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.1);
+    --shadow-intense: 0 0 30px hsl(214 100% 60% / 0.3);
+
+    /* Sidebar colors for light theme */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-primary: 214 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222.2 84% 4.9%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 214 100% 60%;
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -137,5 +215,11 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Smooth transitions for theme switching */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
 }
