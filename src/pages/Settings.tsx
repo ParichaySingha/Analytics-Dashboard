@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Settings, User, Shield, Bell, Database, Palette, Save, Download, Trash2 } from 'lucide-react';
+import { RealTimeClock } from '@/components/dashboard/RealTimeClock';
 
 const SettingsPage = () => {
   const { toast } = useToast();
@@ -92,8 +93,19 @@ const SettingsPage = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Settings</h1>
-          <p className="text-muted-foreground">Manage your dashboard preferences and configurations</p>
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+              <p className="text-muted-foreground">Manage your dashboard preferences and configurations</p>
+            </div>
+            <div className="hidden lg:block">
+              <RealTimeClock />
+            </div>
+          </div>
+          {/* Mobile clock - shows below title on smaller screens */}
+          <div className="lg:hidden mt-4">
+            <RealTimeClock />
+          </div>
         </div>
 
         <Tabs defaultValue="general" className="space-y-6">

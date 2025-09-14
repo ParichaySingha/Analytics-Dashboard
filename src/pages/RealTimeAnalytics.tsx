@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area } from 'recharts';
 import { Activity, Users, Eye, Clock } from 'lucide-react';
+import { RealTimeClock } from '@/components/dashboard/RealTimeClock';
 
 const realTimeData = [
   { time: '12:00', visitors: 145, pageViews: 423, events: 78 },
@@ -24,8 +25,19 @@ const RealTimeAnalyticsPage = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div className="animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground mb-2">Real-time Analytics</h1>
-          <p className="text-muted-foreground">Live data streams and user activity monitoring</p>
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Real-time Analytics</h1>
+              <p className="text-muted-foreground">Live data streams and user activity monitoring</p>
+            </div>
+            <div className="hidden lg:block">
+              <RealTimeClock />
+            </div>
+          </div>
+          {/* Mobile clock - shows below title on smaller screens */}
+          <div className="lg:hidden mt-4">
+            <RealTimeClock />
+          </div>
         </div>
 
         {/* Live Status */}
