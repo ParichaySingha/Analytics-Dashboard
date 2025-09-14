@@ -1,8 +1,9 @@
-import { Bell, Search, User, Sun, Moon, Monitor } from 'lucide-react';
+import { Bell, Search, Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useTheme } from '@/contexts/ThemeContext';
+import { ProfileDropdown } from './ProfileDropdown';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,9 +77,7 @@ export const TopBar = () => {
           <Button variant="ghost" size="icon">
             <Bell className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon">
-            <User className="h-4 w-4" />
-          </Button>
+          <ProfileDropdown />
         </div>
       </div>
     </header>

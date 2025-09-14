@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,16 +8,19 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useColor, predefinedPalettes } from '@/contexts/ColorContext';
-import { Settings, User, Shield, Bell, Database, Palette, Save, Download, Trash2, Sun, Moon, Monitor, Palette as PaletteIcon } from 'lucide-react';
+import { useProfile } from '@/contexts/ProfileContext';
+import { Settings, User, Shield, Bell, Database, Palette, Save, Download, Trash2, Sun, Moon, Monitor, Palette as PaletteIcon, Upload, Camera } from 'lucide-react';
 import { RealTimeClock } from '@/components/dashboard/RealTimeClock';
 
 const SettingsPage = () => {
   const { toast } = useToast();
   const { theme, setTheme, actualTheme } = useTheme();
   const { selectedPalette, setSelectedPalette, customColors, setCustomColors, isCustom, setIsCustom } = useColor();
+  const { profile, updateProfile, saveProfile, isLoading: profileLoading } = useProfile();
   const [isLoading, setIsLoading] = useState(false);
   
   // Form state
@@ -28,6 +31,7 @@ const SettingsPage = () => {
     lastName: '',
     email: '',
     bio: '',
+    avatar: '',
     autoRefresh: true,
     soundAlerts: false,
     twoFactor: false,
@@ -44,6 +48,20 @@ const SettingsPage = () => {
     reducedMotion: false,
   });
 
+  // Load profile data into form when profile changes
+  useEffect(() => {
+    if (profile) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: profile.firstName || '',
+        lastName: profile.lastName || '',
+        email: profile.email || '',
+        bio: profile.bio || '',
+        avatar: profile.avatar || '',
+      }));
+    }
+  }, [profile]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -58,8 +76,21 @@ const SettingsPage = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // For appearance settings, the theme is already saved via the context
-      if (section === 'Appearance') {
+      // For profile settings, save to ProfileContext
+      if (section === 'Profile') {
+        await saveProfile({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          bio: formData.bio,
+          avatar: formData.avatar,
+        });
+        toast({
+          title: "Profile updated",
+          description: "Your profile information has been updated successfully.",
+        });
+      } else if (section === 'Appearance') {
+        // For appearance settings, the theme is already saved via the context
         toast({
           title: "Appearance settings saved",
           description: `Theme and appearance preferences have been updated successfully.`,
@@ -99,6 +130,43 @@ const SettingsPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create object URL for preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        handleInputChange('avatar', result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
   return (
@@ -226,6 +294,64 @@ const SettingsPage = () => {
                 <CardDescription>Update your personal information and bio</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Avatar Section */}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage src={formData.avatar} alt={`${formData.firstName} ${formData.lastName}`} />
+                      <AvatarFallback className="bg-primary/20 text-primary font-semibold text-2xl">
+                        {getInitials(formData.firstName, formData.lastName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-2 -right-2">
+                      <Button
+                        size="icon"
+                        className="h-8 w-8 rounded-full bg-primary hover:bg-primary/90"
+                        onClick={() => document.getElementById('avatar-upload')?.click()}
+                      >
+                        <Camera className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-center space-y-2">
+                    <h3 className="font-medium text-foreground">
+                      {formData.firstName && formData.lastName 
+                        ? `${formData.firstName} ${formData.lastName}` 
+                        : 'No name set'
+                      }
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {formData.email || 'No email set'}
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => document.getElementById('avatar-upload')?.click()}
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Photo
+                      </Button>
+                      {formData.avatar && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleInputChange('avatar', '')}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="first-name">First Name</Label>
@@ -270,9 +396,13 @@ const SettingsPage = () => {
                 </div>
                 
                 <div className="flex justify-end pt-4 border-t">
-                  <Button onClick={() => handleSave('Profile')} disabled={isLoading} className="min-w-[120px]">
+                  <Button 
+                    onClick={() => handleSave('Profile')} 
+                    disabled={isLoading || profileLoading} 
+                    className="min-w-[120px]"
+                  >
                     <Save className="mr-2 h-4 w-4" />
-                    {isLoading ? 'Saving...' : 'Save Profile'}
+                    {isLoading || profileLoading ? 'Saving...' : 'Save Profile'}
                   </Button>
                 </div>
               </CardContent>

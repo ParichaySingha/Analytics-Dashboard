@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ColorProvider } from "@/contexts/ColorContext";
+import { ProfileProvider } from "@/contexts/ProfileContext";
 import Index from "./pages/Index";
 import Overview from "./pages/Overview";
 import RealTimeAnalytics from "./pages/RealTimeAnalytics";
@@ -24,7 +25,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <ColorProvider>
-        <TooltipProvider>
+        <ProfileProvider>
+          <TooltipProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -43,7 +45,8 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </TooltipProvider>
+          </TooltipProvider>
+        </ProfileProvider>
       </ColorProvider>
     </ThemeProvider>
   </QueryClientProvider>
