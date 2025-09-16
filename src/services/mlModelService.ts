@@ -1,4 +1,4 @@
-import { MLModel, CreateModelRequest, UpdateModelRequest, ModelTrainingRequest, ModelPredictionRequest, ModelPrediction, ModelDeployment, ModelMetrics } from '@/types/mlModels';
+import { MLModel, CreateModelRequest, UpdateModelRequest, ModelTrainingRequest, ModelPredictionRequest, ModelPrediction, ModelDeployment, ModelMetrics, DeploymentConfig, DeploymentMetrics, DeploymentLog } from '@/types/mlModels';
 
 // Mock data for development
 const mockModels: MLModel[] = [
@@ -421,6 +421,427 @@ class MLModelService {
       model.tags.some(tag => tag.toLowerCase().includes(lowercaseQuery)) ||
       model.type.toLowerCase().includes(lowercaseQuery)
     );
+  }
+
+  // Deployment methods
+  private deployments: ModelDeployment[] = [
+    {
+      id: 'deploy-1',
+      modelId: '1',
+      modelName: 'Revenue Prediction Model v2.1',
+      endpoint: 'https://api.example.com/models/revenue-prediction',
+      status: 'active',
+      createdAt: '2024-01-15T10:00:00Z',
+      lastUsed: '2024-01-20T14:30:00Z',
+      requestCount: 15420,
+      averageResponseTime: 45,
+      version: '2.1.0',
+      environment: 'production',
+      region: 'us-east-1',
+      instanceType: 'ml.m5.large',
+      scalingConfig: {
+        minInstances: 2,
+        maxInstances: 10,
+        targetUtilization: 70
+      },
+      healthCheck: {
+        status: 'healthy',
+        lastChecked: '2024-01-20T14:30:00Z',
+        responseTime: 42
+      },
+      metrics: {
+        cpuUsage: 65,
+        memoryUsage: 78,
+        requestRate: 12.5,
+        errorRate: 0.2
+      },
+      logs: [
+        {
+          id: 'log-1',
+          deploymentId: 'deploy-1',
+          timestamp: '2024-01-20T14:30:00Z',
+          level: 'info',
+          message: 'Deployment health check passed',
+          details: { responseTime: 42, statusCode: 200 }
+        }
+      ]
+    },
+    {
+      id: 'deploy-2',
+      modelId: '3',
+      modelName: 'Demand Forecasting Engine',
+      endpoint: 'https://api.example.com/models/demand-forecasting',
+      status: 'active',
+      createdAt: '2024-01-10T09:00:00Z',
+      lastUsed: '2024-01-20T12:15:00Z',
+      requestCount: 8930,
+      averageResponseTime: 38,
+      version: '3.0.0',
+      environment: 'production',
+      region: 'us-west-2',
+      instanceType: 'ml.c5.xlarge',
+      scalingConfig: {
+        minInstances: 1,
+        maxInstances: 5,
+        targetUtilization: 60
+      },
+      healthCheck: {
+        status: 'healthy',
+        lastChecked: '2024-01-20T12:15:00Z',
+        responseTime: 35
+      },
+      metrics: {
+        cpuUsage: 45,
+        memoryUsage: 62,
+        requestRate: 8.2,
+        errorRate: 0.1
+      },
+      logs: []
+    }
+  ];
+
+  // Get all deployments
+  async getDeployments(): Promise<ModelDeployment[]> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return [...this.deployments];
+  }
+
+  // Get deployment by ID
+  async getDeploymentById(id: string): Promise<ModelDeployment | null> {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return this.deployments.find(deployment => deployment.id === id) || null;
+  }
+
+  // Create deployment
+  async createDeployment(config: DeploymentConfig): Promise<ModelDeployment> {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const model = this.models.find(m => m.id === config.modelId);
+    if (!model) throw new Error('Model not found');
+
+    const deployment: ModelDeployment = {
+      id: `deploy-${Date.now()}`,
+      modelId: config.modelId,
+      modelName: model.name,
+      endpoint: `https://api.example.com/models/${model.name.toLowerCase().replace(/\s+/g, '-')}`,
+      status: 'deploying',
+      createdAt: new Date().toISOString(),
+      lastUsed: new Date().toISOString(),
+      requestCount: 0,
+      averageResponseTime: 0,
+      version: model.version,
+      environment: config.environment,
+      region: config.region,
+      instanceType: config.instanceType,
+      scalingConfig: config.scalingConfig,
+      healthCheck: {
+        status: 'unknown',
+        lastChecked: new Date().toISOString(),
+        responseTime: 0
+      },
+      metrics: {
+        cpuUsage: 0,
+        memoryUsage: 0,
+        requestRate: 0,
+        errorRate: 0
+      },
+      logs: [
+        {
+          id: `log-${Date.now()}`,
+          deploymentId: `deploy-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: 'Deployment initiated',
+          details: { config }
+        }
+      ]
+    };
+
+    this.deployments.push(deployment);
+
+    // Simulate deployment process
+    setTimeout(() => {
+      const deploymentIndex = this.deployments.findIndex(d => d.id === deployment.id);
+      if (deploymentIndex !== -1) {
+        this.deployments[deploymentIndex].status = 'active';
+        this.deployments[deploymentIndex].healthCheck = {
+          status: 'healthy',
+          lastChecked: new Date().toISOString(),
+          responseTime: Math.random() * 50 + 20
+        };
+        this.deployments[deploymentIndex].logs.push({
+          id: `log-${Date.now()}`,
+          deploymentId: deployment.id,
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: 'Deployment completed successfully',
+          details: { status: 'active' }
+        });
+      }
+    }, 5000);
+
+    return deployment;
+  }
+
+  // Update deployment
+  async updateDeployment(id: string, updates: Partial<ModelDeployment>): Promise<ModelDeployment | null> {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const deploymentIndex = this.deployments.findIndex(d => d.id === id);
+    if (deploymentIndex === -1) return null;
+
+    this.deployments[deploymentIndex] = {
+      ...this.deployments[deploymentIndex],
+      ...updates
+    };
+
+    return this.deployments[deploymentIndex];
+  }
+
+  // Delete deployment
+  async deleteDeployment(id: string): Promise<boolean> {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const deploymentIndex = this.deployments.findIndex(d => d.id === id);
+    if (deploymentIndex === -1) return false;
+
+    this.deployments.splice(deploymentIndex, 1);
+    return true;
+  }
+
+  // Scale deployment
+  async scaleDeployment(id: string, minInstances: number, maxInstances: number): Promise<boolean> {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const deployment = this.deployments.find(d => d.id === id);
+    if (!deployment) return false;
+
+    deployment.status = 'scaling';
+    deployment.scalingConfig.minInstances = minInstances;
+    deployment.scalingConfig.maxInstances = maxInstances;
+
+    // Simulate scaling process
+    setTimeout(() => {
+      deployment.status = 'active';
+      deployment.logs.push({
+        id: `log-${Date.now()}`,
+        deploymentId: id,
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message: 'Scaling completed',
+        details: { minInstances, maxInstances }
+      });
+    }, 3000);
+
+    return true;
+  }
+
+  // Get deployment metrics
+  async getDeploymentMetrics(deploymentId: string, hours: number = 24): Promise<DeploymentMetrics[]> {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    const deployment = this.deployments.find(d => d.id === deploymentId);
+    if (!deployment) return [];
+
+    const metrics: DeploymentMetrics[] = [];
+    const now = new Date();
+    
+    // Generate realistic metrics with patterns
+    for (let i = hours; i >= 0; i--) {
+      const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000);
+      const hour = timestamp.getHours();
+      
+      // Simulate daily patterns
+      const isBusinessHours = hour >= 9 && hour <= 17;
+      const isNightTime = hour >= 22 || hour <= 6;
+      
+      // Base values with realistic patterns
+      const baseRequests = isBusinessHours ? 15 : (isNightTime ? 3 : 8);
+      const baseResponseTime = isBusinessHours ? 45 : 35;
+      const baseCpuUsage = isBusinessHours ? 70 : 40;
+      const baseMemoryUsage = isBusinessHours ? 75 : 50;
+      
+      // Add some randomness but keep it realistic
+      const requestsPerSecond = Math.max(0, baseRequests + (Math.random() - 0.5) * 10);
+      const averageResponseTime = Math.max(20, baseResponseTime + (Math.random() - 0.5) * 30);
+      const errorRate = Math.max(0, Math.min(5, (Math.random() - 0.8) * 3));
+      const cpuUsage = Math.max(10, Math.min(95, baseCpuUsage + (Math.random() - 0.5) * 20));
+      const memoryUsage = Math.max(20, Math.min(90, baseMemoryUsage + (Math.random() - 0.5) * 15));
+      
+      // Active instances based on load
+      const activeInstances = Math.max(1, Math.min(10, Math.floor(requestsPerSecond / 5) + 1));
+      
+      metrics.push({
+        deploymentId,
+        timestamp: timestamp.toISOString(),
+        requestsPerSecond: Math.round(requestsPerSecond * 10) / 10,
+        averageResponseTime: Math.round(averageResponseTime),
+        errorRate: Math.round(errorRate * 100) / 100,
+        cpuUsage: Math.round(cpuUsage * 10) / 10,
+        memoryUsage: Math.round(memoryUsage * 10) / 10,
+        activeInstances
+      });
+    }
+
+    return metrics;
+  }
+
+  // Get deployment logs
+  async getDeploymentLogs(deploymentId: string): Promise<DeploymentLog[]> {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const deployment = this.deployments.find(d => d.id === deploymentId);
+    if (!deployment) return [];
+
+    // Generate comprehensive logs for the deployment
+    const logs: DeploymentLog[] = [
+      {
+        id: `log-${deploymentId}-1`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        level: 'info',
+        message: 'Deployment health check passed',
+        details: { responseTime: 42, statusCode: 200, endpoint: deployment.endpoint }
+      },
+      {
+        id: `log-${deploymentId}-2`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+        level: 'info',
+        message: 'Auto-scaling triggered',
+        details: { 
+          reason: 'High CPU usage detected',
+          cpuUsage: 85,
+          action: 'Scaling up from 2 to 3 instances',
+          newInstanceCount: 3
+        }
+      },
+      {
+        id: `log-${deploymentId}-3`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+        level: 'warning',
+        message: 'High memory usage detected',
+        details: { 
+          memoryUsage: 92,
+          threshold: 90,
+          recommendation: 'Consider upgrading instance type'
+        }
+      },
+      {
+        id: `log-${deploymentId}-4`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+        level: 'info',
+        message: 'Model prediction request processed',
+        details: { 
+          requestId: 'req-12345',
+          processingTime: 156,
+          confidence: 0.89,
+          inputSize: '2.3KB'
+        }
+      },
+      {
+        id: `log-${deploymentId}-5`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+        level: 'error',
+        message: 'Prediction request failed',
+        details: { 
+          requestId: 'req-12344',
+          error: 'Invalid input format',
+          statusCode: 400,
+          retryCount: 0
+        }
+      },
+      {
+        id: `log-${deploymentId}-6`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        level: 'info',
+        message: 'Deployment metrics updated',
+        details: { 
+          requestsPerSecond: 12.5,
+          averageResponseTime: 145,
+          errorRate: 0.02,
+          activeInstances: 2
+        }
+      },
+      {
+        id: `log-${deploymentId}-7`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
+        level: 'info',
+        message: 'Model cache refreshed',
+        details: { 
+          cacheSize: '512MB',
+          hitRate: 0.94,
+          evictedEntries: 12
+        }
+      },
+      {
+        id: `log-${deploymentId}-8`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
+        level: 'warning',
+        message: 'Slow response time detected',
+        details: { 
+          responseTime: 2500,
+          threshold: 2000,
+          requestId: 'req-12343',
+          recommendation: 'Check model performance'
+        }
+      },
+      {
+        id: `log-${deploymentId}-9`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+        level: 'info',
+        message: 'Load balancer health check passed',
+        details: { 
+          instanceId: 'i-1234567890abcdef0',
+          region: deployment.region,
+          status: 'healthy'
+        }
+      },
+      {
+        id: `log-${deploymentId}-10`,
+        deploymentId,
+        timestamp: new Date(Date.now() - 50 * 60 * 1000).toISOString(),
+        level: 'info',
+        message: 'Deployment started successfully',
+        details: { 
+          version: deployment.version,
+          environment: deployment.environment,
+          instanceType: deployment.instanceType,
+          region: deployment.region
+        }
+      }
+    ];
+
+    return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  // Health check deployment
+  async healthCheckDeployment(id: string): Promise<{ status: string; responseTime: number }> {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const deployment = this.deployments.find(d => d.id === id);
+    if (!deployment) throw new Error('Deployment not found');
+
+    const responseTime = Math.random() * 100 + 20;
+    const isHealthy = Math.random() > 0.1; // 90% chance of being healthy
+
+    deployment.healthCheck = {
+      status: isHealthy ? 'healthy' : 'unhealthy',
+      lastChecked: new Date().toISOString(),
+      responseTime
+    };
+
+    return {
+      status: deployment.healthCheck.status,
+      responseTime
+    };
   }
 }
 

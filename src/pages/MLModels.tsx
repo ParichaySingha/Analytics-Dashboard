@@ -34,6 +34,7 @@ import { ModelDetailsDialog } from '@/components/ml-models/ModelDetailsDialog';
 import { ModelAnalytics } from '@/components/ml-models/ModelAnalytics';
 import { ModelPrediction } from '@/components/ml-models/ModelPrediction';
 import { ModelFilters } from '@/components/ml-models/ModelFilters';
+import { DeploymentManagement } from '@/components/ml-models/DeploymentManagement';
 import { ModelType, ModelStatus } from '@/types/mlModels';
 
 const MLModelsPage = () => {
@@ -443,14 +444,7 @@ const MLModelsPage = () => {
           </TabsContent>
 
           <TabsContent value="deployment" className="space-y-6">
-            <Card>
-              <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                  <Zap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-muted-foreground">Deployment management coming soon</p>
-                </div>
-              </div>
-            </Card>
+            <DeploymentManagement models={models || []} />
           </TabsContent>
         </Tabs>
       </div>

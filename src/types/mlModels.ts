@@ -57,12 +57,68 @@ export interface ModelPrediction {
 export interface ModelDeployment {
   id: string;
   modelId: string;
+  modelName: string;
   endpoint: string;
-  status: 'active' | 'inactive' | 'error';
+  status: 'active' | 'inactive' | 'error' | 'deploying' | 'scaling';
   createdAt: string;
   lastUsed: string;
   requestCount: number;
   averageResponseTime: number;
+  version: string;
+  environment: 'development' | 'staging' | 'production';
+  region: string;
+  instanceType: string;
+  scalingConfig: {
+    minInstances: number;
+    maxInstances: number;
+    targetUtilization: number;
+  };
+  healthCheck: {
+    status: 'healthy' | 'unhealthy' | 'unknown';
+    lastChecked: string;
+    responseTime: number;
+  };
+  metrics: {
+    cpuUsage: number;
+    memoryUsage: number;
+    requestRate: number;
+    errorRate: number;
+  };
+  logs: DeploymentLog[];
+}
+
+export interface DeploymentLog {
+  id: string;
+  deploymentId: string;
+  timestamp: string;
+  level: 'info' | 'warning' | 'error';
+  message: string;
+  details?: Record<string, any>;
+}
+
+export interface DeploymentConfig {
+  modelId: string;
+  environment: 'development' | 'staging' | 'production';
+  region: string;
+  instanceType: string;
+  scalingConfig: {
+    minInstances: number;
+    maxInstances: number;
+    targetUtilization: number;
+  };
+  healthCheckEnabled: boolean;
+  monitoringEnabled: boolean;
+}
+
+export interface DeploymentMetrics {
+  deploymentId: string;
+  timestamp: string;
+  requestsPerSecond: number;
+  averageResponseTime: number;
+  errorRate: number;
+  cpuUsage: number;
+  memoryUsage: number;
+  activeInstances: number;
 }
 
 export interface ModelMetrics {

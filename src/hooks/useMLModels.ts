@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { mlModelService } from '@/services/mlModelService';
-import { MLModel, CreateModelRequest, UpdateModelRequest, ModelTrainingRequest, ModelPredictionRequest, ModelPrediction, ModelDeployment, ModelMetrics } from '@/types/mlModels';
+import { MLModel, CreateModelRequest, UpdateModelRequest, ModelTrainingRequest, ModelPredictionRequest, ModelPrediction, ModelDeployment, ModelMetrics, DeploymentConfig, DeploymentMetrics, DeploymentLog } from '@/types/mlModels';
 
 // Query keys
 export const mlModelKeys = {
@@ -12,6 +12,10 @@ export const mlModelKeys = {
   detail: (id: string) => [...mlModelKeys.details(), id] as const,
   metrics: (id: string, days: number) => [...mlModelKeys.detail(id), 'metrics', days] as const,
   search: (query: string) => [...mlModelKeys.all, 'search', query] as const,
+  deployments: () => [...mlModelKeys.all, 'deployments'] as const,
+  deployment: (id: string) => [...mlModelKeys.deployments(), id] as const,
+  deploymentMetrics: (id: string, hours: number) => [...mlModelKeys.deployment(id), 'metrics', hours] as const,
+  deploymentLogs: (id: string) => [...mlModelKeys.deployment(id), 'logs'] as const,
 };
 
 // Custom hook for ML models
@@ -176,4 +180,98 @@ export const useMLModelStats = () => {
   } : null;
 
   return { stats, isLoading: !models };
+};
+
+// Deployment hooks
+export const useDeployments = () => {
+  return useQuery({
+    queryKey: mlModelKeys.deployments(),
+    queryFn: () => mlModelService.getDeployments(),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
+export const useDeployment = (id: string) => {
+  return useQuery({
+    queryKey: mlModelKeys.deployment(id),
+    queryFn: () => mlModelService.getDeploymentById(id),
+    enabled: !!id,
+  });
+};
+
+export const useDeploymentMetrics = (id: string, hours: number = 24) => {
+  return useQuery({
+    queryKey: mlModelKeys.deploymentMetrics(id, hours),
+    queryFn: () => mlModelService.getDeploymentMetrics(id, hours),
+    enabled: !!id,
+    staleTime: 1 * 60 * 1000, // 1 minute
+  });
+};
+
+export const useDeploymentLogs = (id: string) => {
+  return useQuery({
+    queryKey: mlModelKeys.deploymentLogs(id),
+    queryFn: () => mlModelService.getDeploymentLogs(id),
+    enabled: !!id,
+    staleTime: 30 * 1000, // 30 seconds
+  });
+};
+
+export const useCreateDeployment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (config: DeploymentConfig) => mlModelService.createDeployment(config),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: mlModelKeys.deployments() });
+    },
+  });
+};
+
+export const useUpdateDeployment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<ModelDeployment> }) => 
+      mlModelService.updateDeployment(id, updates),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: mlModelKeys.deployments() });
+      queryClient.invalidateQueries({ queryKey: mlModelKeys.deployment(variables.id) });
+    },
+  });
+};
+
+export const useDeleteDeployment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id: string) => mlModelService.deleteDeployment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: mlModelKeys.deployments() });
+    },
+  });
+};
+
+export const useScaleDeployment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, minInstances, maxInstances }: { id: string; minInstances: number; maxInstances: number }) => 
+      mlModelService.scaleDeployment(id, minInstances, maxInstances),
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: mlModelKeys.deployments() });
+      queryClient.invalidateQueries({ queryKey: mlModelKeys.deployment(variables.id) });
+    },
+  });
+};
+
+export const useHealthCheckDeployment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id: string) => mlModelService.healthCheckDeployment(id),
+    onSuccess: (data, id) => {
+      queryClient.invalidateQueries({ queryKey: mlModelKeys.deployment(id) });
+    },
+  });
 };
