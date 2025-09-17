@@ -39,6 +39,7 @@ import { ModelType, ModelStatus } from '@/types/mlModels';
 
 const MLModelsPage = () => {
   const [activeTab, setActiveTab] = useState('models');
+  const [selectedModelForAnalytics, setSelectedModelForAnalytics] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<ModelType[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<ModelStatus[]>([]);
@@ -419,13 +420,36 @@ const MLModelsPage = () => {
           <TabsContent value="analytics" className="space-y-6">
             {filteredAndSortedModels.length > 0 ? (
               <div className="space-y-6">
-                {filteredAndSortedModels.map((model) => (
-                  <Card key={model.id}>
-                    <CardContent className="p-6">
-                      <ModelAnalytics modelId={model.id} modelName={model.name} />
-                    </CardContent>
-                  </Card>
-                ))}
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">Model Analytics</h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Select Model:</span>
+                        <select 
+                          className="px-3 py-1 border border-border rounded-md bg-background text-foreground"
+                          value={selectedModelForAnalytics || filteredAndSortedModels[0]?.id || ''}
+                          onChange={(e) => setSelectedModelForAnalytics(e.target.value)}
+                        >
+                          {filteredAndSortedModels.map((model) => (
+                            <option key={model.id} value={model.id}>
+                              {model.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    {(() => {
+                      const selectedModel = filteredAndSortedModels.find(m => m.id === (selectedModelForAnalytics || filteredAndSortedModels[0]?.id));
+                      return selectedModel ? (
+                        <ModelAnalytics 
+                          modelId={selectedModel.id} 
+                          modelName={selectedModel.name} 
+                        />
+                      ) : null;
+                    })()}
+                  </CardContent>
+                </Card>
               </div>
             ) : (
               <Card>

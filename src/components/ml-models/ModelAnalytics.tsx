@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
-import { TrendingUp, TrendingDown, Activity, Clock, Target } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Clock, Target, BarChart3 } from 'lucide-react';
 
 interface ModelAnalyticsProps {
   modelId: string;
@@ -147,7 +147,7 @@ export const ModelAnalytics = ({ modelId, modelName }: ModelAnalyticsProps) => {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
-              <Target className="h-4 w-4" />
+              <BarChart3 className="h-4 w-4" />
               F1-Score
             </CardTitle>
           </CardHeader>
