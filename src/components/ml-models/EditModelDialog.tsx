@@ -39,14 +39,19 @@ const editModelSchema = z.object({
 type EditModelFormData = z.infer<typeof editModelSchema>;
 
 interface EditModelDialogProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   model: MLModel;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const EditModelDialog = ({ children, model }: EditModelDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const EditModelDialog = ({ children, model, open: controlledOpen, onOpenChange }: EditModelDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [newTag, setNewTag] = useState('');
   const updateModelMutation = useUpdateMLModel();
+  
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
   const form = useForm<EditModelFormData>({
     resolver: zodResolver(editModelSchema),
@@ -93,9 +98,11 @@ export const EditModelDialog = ({ children, model }: EditModelDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

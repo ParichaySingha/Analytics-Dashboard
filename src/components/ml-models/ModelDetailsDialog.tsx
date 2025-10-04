@@ -49,13 +49,18 @@ const trainingSchema = z.object({
 type TrainingFormData = z.infer<typeof trainingSchema>;
 
 interface ModelDetailsDialogProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   model: MLModel;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const ModelDetailsDialog = ({ children, model }: ModelDetailsDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const ModelDetailsDialog = ({ children, model, open: controlledOpen, onOpenChange }: ModelDetailsDialogProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   
   const trainModelMutation = useTrainMLModel();
   const toggleStatusMutation = useToggleMLModelStatus();
@@ -124,9 +129,11 @@ export const ModelDetailsDialog = ({ children, model }: ModelDetailsDialogProps)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+      {children && (
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

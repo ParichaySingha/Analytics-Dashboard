@@ -45,6 +45,9 @@ const MLModelsPage = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<ModelStatus[]>([]);
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<MLModel | null>(null);
 
   const { data: models, isLoading, error } = useMLModels();
   const { stats } = useMLModelStats();
@@ -148,6 +151,16 @@ const MLModelsPage = () => {
     } catch (error) {
       console.error('Failed to toggle model status:', error);
     }
+  };
+
+  const handleViewDetails = (model: MLModel) => {
+    setSelectedModel(model);
+    setShowDetailsDialog(true);
+  };
+
+  const handleEditModel = (model: MLModel) => {
+    setSelectedModel(model);
+    setShowEditDialog(true);
   };
 
   const clearFilters = () => {
@@ -316,18 +329,14 @@ const MLModelsPage = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <ModelDetailsDialog model={model}>
-                              <DropdownMenuItem>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-                            </ModelDetailsDialog>
-                            <EditModelDialog model={model}>
-                              <DropdownMenuItem>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit Model
-                              </DropdownMenuItem>
-                            </EditModelDialog>
+                            <DropdownMenuItem onClick={() => handleViewDetails(model)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditModel(model)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Model
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleToggleStatus(model.id)}>
                               {model.status === 'Active' ? (
                                 <>
@@ -472,6 +481,22 @@ const MLModelsPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialogs */}
+      {selectedModel && (
+        <>
+          <ModelDetailsDialog 
+            model={selectedModel} 
+            open={showDetailsDialog} 
+            onOpenChange={setShowDetailsDialog} 
+          />
+          <EditModelDialog 
+            model={selectedModel} 
+            open={showEditDialog} 
+            onOpenChange={setShowEditDialog} 
+          />
+        </>
+      )}
     </DashboardLayout>
   );
 };
