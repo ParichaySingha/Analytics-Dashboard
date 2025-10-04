@@ -23,36 +23,66 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
-const analyticsItems = [
-  { name: 'Overview', href: '/overview', current: false, icon: BarChart3 },
-  { name: 'Real-time Analytics', href: '/analytics/realtime', current: false, icon: TrendingUp },
-  { name: 'Custom Reports', href: '/analytics/reports', current: false, icon: BarChart3 },
-];
-
-const aiItems = [
-  { name: 'AI Insights', href: '/ai/insights', current: false, icon: Brain },
-  { name: 'ML Models', href: '/ai/models', current: false, icon: Zap },
-  { name: 'Predictions', href: '/ai/predictions', current: false, icon: TrendingUp },
-];
-
-const dataItems = [
-  { name: 'Data Sources', href: '/data/sources', current: false, icon: Database },
-  { name: 'Users', href: '/data/users', current: false, icon: Users },
-  { name: 'API Logs', href: '/data/logs', current: false, icon: Database },
-];
-
-const systemItems = [
-  { name: 'Settings', href: '/settings', current: false, icon: Settings },
+const navigationSections = [
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    items: [
+      { name: 'Overview', href: '/overview', icon: BarChart3 },
+      { name: 'Real-time Analytics', href: '/analytics/realtime', icon: TrendingUp },
+      { name: 'Custom Reports', href: '/analytics/reports', icon: BarChart3 },
+    ]
+  },
+  {
+    id: 'ai',
+    label: 'AI & ML',
+    items: [
+      { name: 'AI Insights', href: '/ai/insights', icon: Brain },
+      { name: 'ML Models', href: '/ai/models', icon: Zap },
+      { name: 'Predictions', href: '/ai/predictions', icon: TrendingUp },
+    ]
+  },
+  {
+    id: 'data',
+    label: 'Data',
+    items: [
+      { name: 'Data Sources', href: '/data/sources', icon: Database },
+      { name: 'Users', href: '/data/users', icon: Users },
+      { name: 'API Logs', href: '/data/logs', icon: Database },
+    ]
+  },
+  {
+    id: 'system',
+    label: 'System',
+    items: [
+      { name: 'Settings', href: '/settings', icon: Settings },
+    ]
+  }
 ];
 
 export const Sidebar = () => {
   const { state } = useSidebar();
   const { preferences } = usePreferences();
+  const location = useLocation();
   const collapsed = state === 'collapsed';
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
-  const renderMenuItems = (items: typeof analyticsItems) => (
+  // Determine which section is currently active based on the current route
+  useEffect(() => {
+    const currentPath = location.pathname;
+    
+    // Find which section contains the current route
+    const activeSectionId = navigationSections.find(section => 
+      section.items.some(item => currentPath === item.href || currentPath.startsWith(item.href + '/'))
+    )?.id;
+
+    setActiveSection(activeSectionId || null);
+  }, [location.pathname]);
+
+  const renderMenuItems = (items: typeof navigationSections[0]['items']) => (
     <SidebarMenu>
       {items.map((item) => {
         const IconComp = (item as any).icon ?? BarChart3;
@@ -64,15 +94,32 @@ export const Sidebar = () => {
                 end
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md transition-colors",
+                    "flex items-center gap-3 px-3 py-2 rounded-md transition-all duration-200 group relative",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-lg border border-primary/20"
-                      : "text-foreground hover:bg-muted"
+                      ? "bg-primary/10 text-foreground shadow-sm border border-primary/30 font-medium"
+                      : "text-foreground hover:bg-muted hover:text-foreground"
                   )
                 }
               >
-                <IconComp className="h-4 w-4 shrink-0 text-foreground" />
-                {!collapsed && <span className="truncate text-foreground">{item.name}</span>}
+                <IconComp className={cn(
+                  "h-4 w-4 shrink-0 transition-colors duration-200",
+                  location.pathname === item.href 
+                    ? "text-primary" 
+                    : "text-muted-foreground group-hover:text-foreground"
+                )} />
+                {!collapsed && (
+                  <span className={cn(
+                    "truncate transition-colors duration-200",
+                    location.pathname === item.href 
+                      ? "text-foreground font-medium" 
+                      : "text-foreground"
+                  )}>
+                    {item.name}
+                  </span>
+                )}
+                {location.pathname === item.href && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full" />
+                )}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -80,6 +127,38 @@ export const Sidebar = () => {
       })}
     </SidebarMenu>
   );
+
+  const renderSection = (section: typeof navigationSections[0]) => {
+    const isActive = activeSection === section.id;
+    const hasActiveItem = section.items.some(item => location.pathname === item.href);
+
+    return (
+      <SidebarGroup key={section.id} className={cn(
+        "transition-all duration-200",
+        isActive && "bg-primary/5 border border-primary/20 rounded-lg"
+      )}>
+        <SidebarGroupLabel className={cn(
+          "px-2 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors duration-200",
+          isActive 
+            ? "text-foreground font-bold bg-primary/10 px-2 py-1 rounded-md" 
+            : hasActiveItem 
+              ? "text-foreground" 
+              : "text-muted-foreground"
+        )}>
+          {section.label}
+          {isActive && (
+            <div className="inline-block w-2 h-2 bg-primary rounded-full ml-2 animate-pulse" />
+          )}
+        </SidebarGroupLabel>
+        <SidebarGroupContent className={cn(
+          "transition-all duration-200",
+          isActive && "bg-primary/5 rounded-md p-1"
+        )}>
+          {renderMenuItems(section.items)}
+        </SidebarGroupContent>
+      </SidebarGroup>
+    );
+  };
 
   return (
     <ShadcnSidebar className="border-r border-border bg-card">
@@ -102,46 +181,8 @@ export const Sidebar = () => {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-2">
-        {/* Analytics Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Analytics
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            {renderMenuItems(analyticsItems)}
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* AI Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            AI & ML
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            {renderMenuItems(aiItems)}
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Data Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Data
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            {renderMenuItems(dataItems)}
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* System Section */}
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            System
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            {renderMenuItems(systemItems)}
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarContent className="p-2 space-y-1">
+        {navigationSections.map(renderSection)}
       </SidebarContent>
 
       {/* Footer with collapse trigger */}
